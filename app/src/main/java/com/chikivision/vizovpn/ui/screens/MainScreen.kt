@@ -11,7 +11,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,24 +23,25 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.tooling.preview.Preview
 import com.chikivision.vizovpn.ui.state.MainUiState
 import com.chikivision.vizovpn.ui.theme.*
 import com.chikivision.vizovpn.ui.viewmodels.MainScreenEvent
 import com.chikivision.vizovpn.ui.viewmodels.MainViewModel
-import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun MainScreen(
     viewModel: MainViewModel,
-    onNavigateToServerList: () -> Unit
+    onNavigateToServerList: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsState()
 
     MainScreenContent(
-        state = state,
+        state = uiState,
         onEvent = viewModel::onEvent,
-        onNavigateToServerList = onNavigateToServerList
+        onNavigateToServerList = onNavigateToServerList,
+        onNavigateToSettings = onNavigateToSettings
     )
 }
 
@@ -46,7 +49,8 @@ fun MainScreen(
 fun MainScreenContent(
     state: MainUiState,
     onEvent: (MainScreenEvent) -> Unit,
-    onNavigateToServerList: () -> Unit
+    onNavigateToServerList: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -78,7 +82,14 @@ fun MainScreenContent(
                 onNavigateToServerList = onNavigateToServerList
             )
             Spacer(modifier = Modifier.height(16.dp))
-            SettingsCard()
+
+            SettingsCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable { onNavigateToSettings() }
+            )
+
             Spacer(modifier = Modifier.weight(1f, fill = false))
             Footer()
         }
@@ -220,7 +231,14 @@ fun ServerItem(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(name, fontWeight = FontWeight.Medium)
             if (isPremium) {
-                Icon(Icons.Default.Star, contentDescription = "Premium", tint = PremiumYellow, modifier = Modifier.size(16.dp).padding(start = 4.dp))
+                Icon(
+                    Icons.Default.Star,
+                    contentDescription = "Premium",
+                    tint = PremiumYellow,
+                    modifier = Modifier
+                        .size(16.dp)
+                        .padding(start = 4.dp)
+                )
             }
         }
         Text(speed, color = TextSecondary, fontSize = 12.sp)
@@ -228,31 +246,44 @@ fun ServerItem(
 }
 
 @Composable
-fun SettingsCard() {
+fun SettingsCard(modifier: Modifier = Modifier) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = CardBackground)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text("Settings", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)
             Spacer(modifier = Modifier.height(8.dp))
-            SettingItem(name = "Auto-Reconnect")
-            SettingItem(name = "Kill Switch")
+            SettingItem(
+                name = "Auto-Reconnect",
+                isChecked = false,
+                onCheckedChange = {}
+            )
+            SettingItem(
+                name = "Kill Switch",
+                isChecked = false,
+                onCheckedChange = {}
+            )
         }
     }
 }
 
 @Composable
-fun SettingItem(name: String) {
-    var isChecked by remember { mutableStateOf(false) }
+fun SettingItem(
+    name: String,
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(name, fontWeight = FontWeight.Medium, color = TextPrimary)
-        Switch(checked = isChecked, onCheckedChange = { isChecked = it })
+        Switch(checked = isChecked, onCheckedChange = onCheckedChange)
     }
 }
 
@@ -285,7 +316,8 @@ fun MainScreenPreview() {
         MainScreenContent(
             state = MainUiState(isConnected = false, selectedServer = "United States"),
             onEvent = {},
-            onNavigateToServerList = {}
+            onNavigateToServerList = {},
+            onNavigateToSettings = {}
         )
     }
 }

@@ -90,6 +90,7 @@ dependencies {
     implementation("com.google.dagger:dagger:2.54")
     kapt("com.google.dagger:dagger-compiler:2.54")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")

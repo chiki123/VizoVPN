@@ -54,7 +54,7 @@ class VizoVpnService : VpnService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_CONNECT -> {
-                // ✅ Read the configuration string from the intent
+                // ✅ Read the configuration string from the intent sent by the ViewModel
                 val configString = intent.getStringExtra("CONFIG")
                 if (configString != null) {
                     serviceScope.launch { startVpn(configString) }
@@ -70,7 +70,6 @@ class VizoVpnService : VpnService() {
         return START_STICKY
     }
 
-    // ✅ This function now accepts the config string as a parameter
     private fun startVpn(config: String) {
         VpnStateHolder.update(VpnState.CONNECTING)
         Log.i(TAG, "Attempting to start VPN...")

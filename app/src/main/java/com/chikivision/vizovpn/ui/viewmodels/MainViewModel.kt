@@ -23,10 +23,9 @@ class MainViewModel @Inject constructor(
     serverRepository: ServerRepository
 ) : ViewModel() {
 
-    // This holds the currently selected server object
+    // This now holds the entire selected server object, not just the name.
     private val _selectedServer = MutableStateFlow<ServerEntity?>(null)
 
-    // This combines all data sources into a single state for the UI
     val uiState = combine(
         VpnStateHolder.vpnState,
         serverRepository.getAllServers(),
@@ -70,7 +69,7 @@ class MainViewModel @Inject constructor(
         when (event) {
             is MainScreenEvent.ConnectButtonClicked -> toggleConnection()
             is MainScreenEvent.ServerSelected -> {
-                // ✅ When a server is selected, update our state
+                // ✅ When a server is selected, update our state with the full object
                 _selectedServer.value = event.server
             }
         }
@@ -107,7 +106,7 @@ class MainViewModel @Inject constructor(
 
         Intent(application, VizoVpnService::class.java).also {
             it.action = VizoVpnService.ACTION_CONNECT
-            // ✅ Pass the selected server's configuration to the service
+            // ✅ Pass the selected server's specific configuration to the service
             it.putExtra("CONFIG", selectedConfig)
             application.startService(it)
         }
